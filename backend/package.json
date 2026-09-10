@@ -1,0 +1,9 @@
+{
+  "name": "creatoros-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CreatorOS Project ATLAS backend",
+  "main": "src/server.js",
+  "scripts": {"start":"node src/server.js","test":"node ../scripts/run_all_tests.js"},
+  "engines": {"node": ">=18"}
+}

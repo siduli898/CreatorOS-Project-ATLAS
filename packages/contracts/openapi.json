@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.3",
+  "info": {"title": "CreatorOS API", "version": "1.0.0", "description": "Project ATLAS API contract"},
+  "servers": [{"url": "http://localhost:8080"}],
+  "paths": {
+    "/health": {"get": {"responses": {"200": {"description": "Healthy"}}}},
+    "/v1/auth/register": {"post": {"requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object"}}}}, "responses": {"201": {"description": "Registered"}}}},
+    "/v1/auth/login": {"post": {"responses": {"200": {"description": "Authenticated"}}}},
+    "/v1/compliance/age-verify": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Verified"}}}},
+    "/v1/feed": {"get": {"responses": {"200": {"description": "Feed"}}}},
+    "/v1/posts": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}},
+    "/v1/content/{postId}/ppv-purchase": {"post": {"security": [{"bearerAuth": []}], "parameters": [{"name": "postId", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Unlocked"}}}},
+    "/v1/marketplace/services": {"get": {"responses": {"200": {"description": "Listings"}}}, "post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}},
+    "/v1/live/rooms": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Room created"}}}},
+    "/v1/ledger/statement": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Ledger statement"}}}}
+  },
+  "components": {"securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}}}
+}

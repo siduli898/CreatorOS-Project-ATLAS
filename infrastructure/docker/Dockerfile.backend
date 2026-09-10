@@ -1,0 +1,7 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY backend/package*.json ./backend/
+COPY backend/src ./backend/src/
+COPY packages ./packages/
+EXPOSE 8080
+CMD ["node","backend/src/server.js"]

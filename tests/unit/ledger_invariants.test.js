@@ -1,0 +1,12 @@
+const assert=require('assert');
+const ledger=require('../../backend/src/domains/ledger/engine');
+const fan=ledger.getOrCreateUserWallet('fan_test');
+const creator=ledger.getOrCreateCreatorPayable('creator_test');
+const rev=ledger.getSystemAccount('REVENUE_PLATFORM_PPV_FEE');
+const processor=ledger.getSystemAccount('ASSET_PROCESSOR_RECEIVABLE');
+ledger.recordTransaction({idempotencyKey:`deposit_${Date.now()}`,entryType:'WALLET_DEPOSIT',referenceEntityType:'PAYMENT',referenceEntityId:'p',description:'deposit',legs:[{accountId:processor.id,amountCents:-10000},{accountId:fan.id,amountCents:10000}]});
+assert.strictEqual(fan.balanceCents,10000);
+assert.throws(()=>ledger.recordTransaction({idempotencyKey:`bad_${Date.now()}`,entryType:'PPV_PURCHASE',referenceEntityType:'POST',referenceEntityId:'p',description:'bad',legs:[{accountId:fan.id,amountCents:-1},{accountId:creator.id,amountCents:2}]}),/invariant violation/);
+const tx=ledger.recordTransaction({idempotencyKey:`valid_${Date.now()}`,entryType:'PPV_PURCHASE',referenceEntityType:'POST',referenceEntityId:'p',description:'valid',legs:[{accountId:fan.id,amountCents:-2500},{accountId:creator.id,amountCents:2125},{accountId:rev.id,amountCents:375}]});
+assert.strictEqual(tx.duplicate,false);assert.strictEqual(fan.balanceCents,7500);
+console.log('ledger invariant tests passed');

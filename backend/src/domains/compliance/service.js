@@ -1,0 +1,7 @@
+const { generateUUID }=require('../../utils/crypto');const {recordAudit}=require('../../utils/audit');const authService=require('../auth/service');
+class ComplianceService{
+ constructor(){this.performerRecords=new Map();this.consentForms=new Map();}
+ verifyAdultAge({userId,documentType,legalDob,documentHash}){const u=authService.getUserById(userId);if(!u)throw new Error('User not found.');const dob=new Date(legalDob);const now=new Date();let age=now.getUTCFullYear()-dob.getUTCFullYear();if(now<new Date(Date.UTC(now.getUTCFullYear(),dob.getUTCMonth(),dob.getUTCDate())))age--;if(age<18)throw new Error('Age verification failed: Individual is under 18 years of age.');u.isAgeVerified=true;u.ageVerifiedAt=now.toISOString();recordAudit({actorUserId:userId,actorRole:u.role,action:'AGE_VERIFICATION_APPROVED',resourceType:'AGE_RECORD',resourceId:userId,details:{documentType,verifiedAge:age}});return {success:true,isAgeVerified:true,verifiedAge:age};}
+ register2257Performer({creatorId,legalName,stageName,dob,idType,idNumberHash,custodianAddress}){const id=generateUUID();const r={id,creatorId,stageName,legalNameVaultId:generateUUID(),dob,idType,idNumberHash,custodianAddress:custodianAddress||'CreatorOS Custodian of Records',verifiedAt:new Date().toISOString()};this.performerRecords.set(id,r);recordAudit({actorUserId:creatorId,actorRole:'CREATOR',action:'2257_PERFORMER_RECORD_FILED',resourceType:'COMPLIANCE_2257',resourceId:id});return r;}
+}
+module.exports=new ComplianceService();

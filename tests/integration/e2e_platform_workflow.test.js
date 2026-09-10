@@ -1,0 +1,15 @@
+const assert=require('assert');
+const auth=require('../../backend/src/domains/auth/service');
+const compliance=require('../../backend/src/domains/compliance/service');
+const content=require('../../backend/src/domains/content/service');
+const ledger=require('../../backend/src/domains/ledger/engine');
+const fan=auth.register({email:`fan_${Date.now()}@example.com`,password:'SecurePassword2026!',is18PlusDeclared:true});
+const creator=auth.register({email:`creator_${Date.now()}@example.com`,password:'SecurePassword2026!',is18PlusDeclared:true});
+compliance.verifyAdultAge({userId:fan.id,documentType:'PASSPORT',legalDob:'1990-01-01'});
+compliance.verifyAdultAge({userId:creator.id,documentType:'PASSPORT',legalDob:'1990-01-01'});
+const wallet=ledger.getOrCreateUserWallet(fan.id), processor=ledger.getSystemAccount('ASSET_PROCESSOR_RECEIVABLE');
+ledger.recordTransaction({idempotencyKey:`e2e_dep_${Date.now()}`,entryType:'WALLET_DEPOSIT',referenceEntityType:'PAYMENT',referenceEntityId:'e2e',description:'deposit',legs:[{accountId:processor.id,amountCents:-5000},{accountId:wallet.id,amountCents:5000}]});
+const post=content.createPost({creatorId:creator.id,textContent:'test',visibility:'PPV_ONLY',isPPV:true,ppvPriceCents:3000});
+assert.strictEqual(content.purchasePPV({userId:fan.id,postId:post.id,idempotencyKey:`e2e_ppv_${Date.now()}`}).success,true);
+assert.strictEqual(wallet.balanceCents,2000);
+console.log('e2e workflow passed');
